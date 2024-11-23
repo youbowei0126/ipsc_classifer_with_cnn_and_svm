@@ -1,0 +1,8 @@
+*.csv
+*.tiff
+*.tif
+.history/
+.trash/
+assest_csv/
+assest_image/
+**/__pycache__/
