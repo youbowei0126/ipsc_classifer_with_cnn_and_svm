@@ -19,7 +19,7 @@ def plot_gray_image(image, new_frame=True):
     # plt.axis("off")
 
 
-PATH = r"assest_image\234004.tiff"
+PATH = r"assest_image\908030.tiff"
 # 讀取 TIFF 影像
 tiff_data = tiff.imread(PATH)
 
@@ -32,6 +32,7 @@ my.plt_general_setting_init()
 for i in range(tiff_data.shape[1]):
     plt.subplot(2, 4, i + 1)
     plot_gray_image(tiff_data[tiff_data.shape[0] // 3, i, :, :], new_frame=False)
+    plt.title(tiff_data[:, i, :, :].max())
     plt.axis("off")
 
 plt.tight_layout()
