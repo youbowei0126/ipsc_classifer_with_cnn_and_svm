@@ -19,7 +19,7 @@ def plot_gray_image(image, new_frame=True):
     # plt.axis("off")
 
 
-PATH = my.parent_folder_or_file_under("234004.tiff")
+PATH = r"assest_image\234004.tiff"
 # 讀取 TIFF 影像
 tiff_data = tiff.imread(PATH)
 
@@ -47,12 +47,12 @@ for j in tqdm(range(tiff_data.shape[1])):
     plt.tight_layout()
     plt.subplots_adjust(wspace=0, hspace=0)
 
-with open(my.parent_folder_or_file_under("tag.txt"), "w") as file_:
+with open("tag.txt", "w") as file_:
     with tiff.TiffFile(PATH) as tif:
         for page in tif.pages:
             print(page.tags, file=file_)  # 查看每一頁的標籤數據
 
-info = pd.read_csv(my.parent_folder_or_file_under("select.csv"))
+info = pd.read_csv(r"assest_csv\select_TUBA1B_sample.csv")
 print(
     info.loc[
         3,

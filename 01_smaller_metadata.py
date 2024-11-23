@@ -17,9 +17,9 @@ columns_to_keep = [
     "STR_shape_volume", "STR_connectivity_cc"
 ]
 
-df = pd.read_csv(my.parent_folder_or_file_under("metadata.csv"))
+df = pd.read_csv(r"assest_csv\metadata.csv")
 print("loaded")
 df_filtered = df[columns_to_keep]
 print("filtered")
-df_filtered.to_csv(my.parent_folder_or_file_under("smaller_metadata.csv"), index=False)
+df_filtered.to_csv(r"assest_csv\smaller_metadata.csv", index=False)
 print("done")

@@ -7,7 +7,7 @@ pkg = quilt3.Package.browse(
     "aics/hipsc_single_cell_image_dataset", registry="s3://allencell"
 )
 meta_df = pd.read_csv(
-    r"D:\backup\user\Documents\16_learning_project\04_software_tool\03_python\workspace\machinelearning\final_project\smaller_metadata.csv"
+    r"assest_csv\smaller_metadata.csv"
 )
 
 print(meta_df.columns)
@@ -20,7 +20,7 @@ data = data.apply(pd.DataFrame.sample, n=num_sample)
 data = data.reset_index(drop=True)
 print(data)
 data=data[:5]
-data.to_csv(my.parent_folder_or_file_under("select.csv"))
+data.to_csv(r"assest_csv\select.csv")
 # prepare file paths
 save_path = Path("C:/projects/allen_cell_data/")
 save_path.mkdir(exist_ok=True)

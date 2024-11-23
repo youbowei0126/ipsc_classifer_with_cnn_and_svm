@@ -6,7 +6,7 @@ from tqdm import tqdm
 # import mylib as my
 pkg = quilt3.Package.browse("aics/hipsc_single_cell_image_dataset", registry="s3://allencell")
 meta_df = pd.read_csv(
-    r"D:\backup\user\Documents\16_learning_project\04_software_tool\03_python\workspace\machinelearning\final_project\smaller_metadata.csv"
+    r"assest_csv\smaller_metadata.csv"
 )
 
 print(meta_df.columns)
@@ -17,7 +17,7 @@ num_sample = 1
 
 data_TUBA1B = meta_df.loc[meta_df["structure_name"] == "TUBA1B", :]
 print(len(data_TUBA1B))
-data_TUBA1B.to_csv(my.parent_folder_or_file_under("select_TUBA1B.csv"))
+data_TUBA1B.to_csv(r"assest_csv\select_TUBA1B.csv")
 print(data_TUBA1B["cell_stage"].value_counts())
 
 data_TUBA1B_sample = (
@@ -27,9 +27,9 @@ data_TUBA1B_sample = (
     # random_state 確保結果可重現
 )
 
-data_TUBA1B_sample=data_TUBA1B_sample.iloc[-5:,:]
+# data_TUBA1B_sample=data_TUBA1B_sample.iloc[-5:,:]
 
-data_TUBA1B_sample.to_csv(my.parent_folder_or_file_under("select_TUBA1B_sample.csv"))
+data_TUBA1B_sample.to_csv(r"assest_csv\select_TUBA1B_sample.csv")
 
 
 
