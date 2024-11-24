@@ -6,3 +6,5 @@
 assest_csv/
 assest_image/
 **/__pycache__/
+*.zip
+dataset_new/
