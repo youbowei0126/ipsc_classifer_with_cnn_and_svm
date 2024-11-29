@@ -9,6 +9,8 @@ import tensorflow as tf
 from keras import Sequential, layers
 import os
 import sys
+from tensorflow.keras.models import Model,load_model
+from sklearn.svm import SVC
 
 
 def plot_train_history(train_history, train="accuracy", validation="val_accuracy"):
@@ -22,6 +24,7 @@ def plot_train_history(train_history, train="accuracy", validation="val_accuracy
 
 
 def load_dataset(path):
+    print('start loading dataset ...')
     train_path = path + "/" + "train/"
     test_path = path + "/" + "test/"
     cata = os.listdir(train_path)
@@ -44,7 +47,7 @@ def load_dataset(path):
             y_test_this_cata = np.zeros((len(x_test_this_cata), cata_number))
             y_test_this_cata[:, i] = 1
             y_test = y_test_this_cata
-            print(f"load {cata[i]} complete")
+            print(f"load \"{cata[i]}\" complete")
         else:
             x_train_this_cata = read_TFF_file_from_folder(train_path + "/" + cata[i])
             x_train = np.vstack((x_train, x_train_this_cata))
@@ -57,7 +60,7 @@ def load_dataset(path):
             y_test_this_cata = np.zeros((len(x_test_this_cata), cata_number))
             y_test_this_cata[:, i] = 1
             y_test = np.vstack((y_test, y_test_this_cata))
-            print(f"load {cata[i]} complete")
+            print(f"load \"{cata[i]}\" complete")
 
     return x_train, y_train, x_test, y_test, list_of_cata
 
@@ -123,7 +126,7 @@ def bulid_model(model):
 
 def main():
     print("program start")
-    set_random_seed(42)
+    set_random_seed(1)
     check_GPU()
 
     #  build model
@@ -132,6 +135,11 @@ def main():
     global cnn_feature;cnn_feature = [32, 64, 128]
     global input_shape;input_shape = (150, 150, 7)
     global n_catagory;n_catagory = 5
+    global train_new_model;train_new_model=True
+    # train_new_model=False to use trained model
+    
+    
+    
     model = Sequential()
     model=bulid_model(model)
     from tensorflow.keras.optimizers import RMSprop
@@ -143,20 +151,51 @@ def main():
 
     x_train, y_train, x_test, y_test, list_of_cata = load_dataset(r"dataset_new\iPSC_Morphologies")
     print(list_of_cata)
-    train_history = model.fit(
-        x_train,
-        y_train,
-        batch_size=32,
-        epochs=30,
-        verbose=1,
-        validation_split=0.2,
-    )
-    model.save("model001.keras")
+    
+
+    if train_new_model:
+        print("start training")
+        train_history = model.fit(
+            x_train,
+            y_train,
+            batch_size=32,
+            epochs=30,
+            verbose=1,
+            validation_split=0.2,
+        )
+        model.save("model002.keras")
+        plot_train_history(train_history)
+    else:
+        model=load_model("model002.keras")
+        print("load trained model")
+     
+    from sklearn.metrics import classification_report
     loss, accuracy = model.evaluate(x_test, y_test)
+    
     print("test loss: ", loss)
     print("test accuracy: ", accuracy)
 
-    plot_train_history(train_history)
+    
+    # get cnn model
+    CNN_model=Model(inputs=model.input,outputs=model.layers[6].output)
+    CNN_model.summary()
+    features_train = CNN_model.predict(x_train)
+    features_test = CNN_model.predict(x_test)
+    y_train_cata=np.argmax(y_train, axis=1)
+    y_test_cata=np.argmax(y_test, axis=1)
+    
+    print(features_train.shape)
+    print(features_train[0])
+    
+    # train svm
+    svm = SVC(kernel='linear')
+    print("start training svm...")
+    svm.fit(features_train, y_train_cata)
+    print("training end")
+    y_predict=svm.predict(features_test)
+    
+    report = classification_report(y_test_cata, y_predict)
+    print(report)
     plt.show()
     print("program end")
 
