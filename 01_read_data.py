@@ -19,7 +19,7 @@ def plot_gray_image(image, new_frame=True):
     # plt.axis("off")
 
 
-PATH = r"dataset_new\iPSC_Morphologies\Round\Round_o0011_i6542_APC-Brightfield-DAPI-GREEN-PE-CellSegmentation-NucleusSegmentation.tiff"
+PATH = r"dataset_new\iPSC_QCData\Cell\Cell_o0004_i1072_APC-Brightfield-DAPI-GREEN-PE-RDP3001.tiff"
 # 讀取 TIFF 影像
 tiff_data = tiff.imread(PATH)
 
