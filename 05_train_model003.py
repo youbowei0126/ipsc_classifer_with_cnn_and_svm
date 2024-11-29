@@ -106,22 +106,72 @@ def check_GPU():
     print(tf.config.experimental.list_physical_devices("GPU"))
     gpus = tf.config.experimental.list_physical_devices("GPU")
     tf.config.experimental.set_visible_devices(gpus[0], "GPU")
+    '''
+    if gpus:
+        try:
+            tf.config.experimental.set_virtual_device_configuration(
+                gpus[0],
+                [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=1024*8)]
+            )
+        except RuntimeError as e:
+            print(e)'''
+    
 
 
-def bulid_model(model):
-    model.add(layers.Convolution2D(cnn_feature[0],(3, 3),input_shape=input_shape,activation="relu",padding="SAME",))
-    model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.Convolution2D(cnn_feature[1], (3, 3), activation="relu", padding="SAME"))
-    model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.Convolution2D(cnn_feature[2], (3, 3), activation="relu", padding="SAME"))
-    model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.Flatten())
-    model.add(layers.Dense(units=hidden_layer[0], activation="relu"))
-    model.add(layers.Dropout(0.2))
-    model.add(layers.Dense(units=hidden_layer[1], activation="relu"))
-    model.add(layers.Dropout(0.2))
-    model.add(layers.Dense(units=n_catagory, activation="softmax"))
-    return model
+def bulid_model():
+    
+    def print_shape(x):
+        print(x.shape)
+        return x
+
+  
+    
+    input_layer=layers.Input(shape=input_shape)
+    new_h = input_shape[0]
+    new_h = new_h if new_h % 2 == 0 else new_h + 1
+    new_w = input_shape[1]
+    new_w = new_w if new_w % 2 == 0 else new_w + 1
+    # padded_input = layers.Lambda(print_shape)(input_layer)
+    padded_input = layers.Lambda(lambda x: tf.image.resize_with_pad(x, new_h, new_w))(input_layer)
+    # padded_input = layers.Lambda(print_shape)(padded_input)
+    new_h_half=new_h//2
+    new_w_half=new_w//2
+    full=layers.AveragePooling2D((2,2))(padded_input)
+    left_top = layers.Lambda(lambda x: x[:, :new_h_half, :new_w_half, :])(padded_input)
+    right_top = layers.Lambda(lambda x: x[:, :new_h_half, new_w_half:, :])(padded_input)
+    left_bottom = layers.Lambda(lambda x: x[:, new_h_half:, :new_w_half, :])(padded_input)
+    right_bottom = layers.Lambda(lambda x: x[:, new_h_half:, new_w_half:, :])(padded_input)
+    # right_bottom = layers.Lambda(print_shape)(right_bottom)
+    # print(right_bottom.shape)
+    def cnn_and_pool(input_layer, filters=cnn_feature, kernel_size=(3, 3), pool_size=(2, 2)):
+        # x = layers.Lambda(print_shape)(input_layer)
+        x = layers.Conv2D(filters[0], kernel_size, activation='relu', padding='same')(input_layer)
+        # x = layers.Lambda(print_shape)(x)
+        x = layers.MaxPooling2D(pool_size)(x)
+        # x = layers.Lambda(print_shape)(x)
+        x = layers.Conv2D(filters[1], kernel_size, activation='relu', padding='same')(x)
+        x = layers.MaxPooling2D(pool_size)(x)
+        x = layers.Conv2D(filters[2], kernel_size, activation='relu', padding='same')(x)
+        x = layers.MaxPooling2D(pool_size)(x)
+        return x
+    
+    full_cnn=cnn_and_pool(full)
+    left_top_cnn=cnn_and_pool(left_top)
+    right_top_cnn=cnn_and_pool(right_top)
+    left_bottom_cnn=cnn_and_pool(left_bottom)
+    right_bottom_cnn=cnn_and_pool(right_bottom)
+    conjugate=layers.Concatenate(axis=-1)([full_cnn,left_top_cnn,right_top_cnn,left_bottom_cnn,right_bottom_cnn])
+    output=layers.Conv2D(cnn_feature[3], (3,3), activation='relu', padding='same')(conjugate)
+    output=layers.MaxPooling2D((2,2))(output)
+    
+    output=layers.Flatten()(output)
+    output=layers.Dense(units=hidden_layer[0], activation="relu")(output)
+    output=layers.Dropout(0.2)(output)
+    output=layers.Dense(units=hidden_layer[1], activation="relu")(output)
+    output=layers.Dropout(0.2)(output)
+    output=layers.Dense(units=n_catagory, activation="softmax")(output)
+    
+    return Model(inputs=input_layer, outputs=output)
 
 
 def main():
@@ -132,29 +182,32 @@ def main():
     #  build model
 
     global hidden_layer;hidden_layer = [1024, 1024]
-    global cnn_feature;cnn_feature = [32, 64, 128]
+    global cnn_feature;cnn_feature = [32, 64, 128,256]
     global input_shape;input_shape = (150, 150, 7)
     global n_catagory;n_catagory = 5
     global train_new_model;train_new_model=False
     # train_new_model=False to use trained model
     
-    
-    
-    model = Sequential()
-    model=bulid_model(model)
+    model=bulid_model()
     from tensorflow.keras.optimizers import RMSprop
     
     model.compile(optimizer=RMSprop(learning_rate=1e-4), loss="categorical_crossentropy", metrics=["accuracy"])
     model.summary()
     # plot model
-    from tensorflow.keras.utils import plot_model,model_to_dot
-    plot_model(model,show_shapes=True,to_file="model002.png",dpi=2400)
-        
+    from tensorflow.keras.utils import plot_model
+    print("generate image...")
+    # plot_model(model,show_shapes=True,to_file="model003.png",dpi=2400)
+    print("generate image complete")
+    
+    
+    
+    
     # evaluate model
-
+    
     x_train, y_train, x_test, y_test, list_of_cata = load_dataset(r"dataset_new\iPSC_Morphologies")
     print(list_of_cata)
-    
+    print(x_train.shape)
+    print(y_train.shape)
 
     if train_new_model:
         print("start training")
@@ -166,10 +219,10 @@ def main():
             verbose=1,
             validation_split=0.2,
         )
-        model.save("model002.keras")
+        model.save("model003.keras")
         plot_train_history(train_history)
     else:
-        model=load_model("model002.keras")
+        model=load_model("model003.keras")
         print("load trained model")
      
     from sklearn.metrics import classification_report
@@ -177,8 +230,10 @@ def main():
     
     print("test loss: ", loss)
     print("test accuracy: ", accuracy)
+    from sklearn.metrics import classification_report
+    print(classification_report(np.argmax(y_test, axis=1), np.argmax(model.predict(x_test), axis=1)))
 
-    
+    '''
     # get cnn model
     CNN_model=Model(inputs=model.input,outputs=model.layers[6].output)
     CNN_model.summary()
@@ -200,6 +255,7 @@ def main():
     report = classification_report(y_test_cata, y_predict)
     print(report)
     plt.show()
+    '''
     
     
 

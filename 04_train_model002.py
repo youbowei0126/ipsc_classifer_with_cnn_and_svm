@@ -177,7 +177,7 @@ def main():
     
     print("test loss: ", loss)
     print("test accuracy: ", accuracy)
-
+    print(classification_report(np.argmax(y_test, axis=1), np.argmax(model.predict(x_test), axis=1)))
     
     # get cnn model
     CNN_model=Model(inputs=model.input,outputs=model.layers[6].output)
