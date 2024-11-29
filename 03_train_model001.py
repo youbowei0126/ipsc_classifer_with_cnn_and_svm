@@ -156,7 +156,7 @@ def main():
     print("test loss: ", loss)
     print("test accuracy: ", accuracy)
 
-    plot_train_history(train_history)
+    plot_train_history(train_history)   
     plt.show()
     print("program end")
 
