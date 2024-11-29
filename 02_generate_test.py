@@ -28,8 +28,8 @@ def move_random_files(src_path, dest_path, percentage=0.2):
 
 
 random.seed(42)
-src_path = r"dataset_new\iPSC_QCData\train"
-dest_path = r"dataset_new\iPSC_QCData\test"
-for cat in ["Cell", "Debris", "DyingCell", "MitoticCell"]:
+src_path = r"dataset_new\iPSC_Morphologies\train"
+dest_path = r"dataset_new\iPSC_Morphologies\test"
+for cat in ["Big", "Long", "Mitotic", "RAR-treated","Round"]:
     move_random_files(src_path + "\\" + cat, dest_path + "\\" + cat, 0.2)
     print("complete")
