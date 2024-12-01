@@ -126,7 +126,7 @@ def bulid_model(model):
 
 def main():
     print("program start")
-    set_random_seed(1)
+    set_random_seed(42)
     check_GPU()
 
     #  build model
@@ -135,7 +135,7 @@ def main():
     global cnn_feature;cnn_feature = [32, 64, 128]
     global input_shape;input_shape = (150, 150, 7)
     global n_catagory;n_catagory = 5
-    global train_new_model;train_new_model=False
+    global train_new_model;train_new_model=True
     # train_new_model=False to use trained model
     
     

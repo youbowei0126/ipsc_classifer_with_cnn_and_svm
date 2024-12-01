@@ -123,7 +123,7 @@ def bulid_model(model):
 
 def main():
     print("program start")
-    set_random_seed(4)
+    set_random_seed(42)
     check_GPU()
 
     #  build model
