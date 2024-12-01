@@ -4,7 +4,9 @@
 .history/
 .trash/
 assest_csv/
+ref/
 assest_image/
 **/__pycache__/
 *.zip
 dataset_new/
+*.keras
