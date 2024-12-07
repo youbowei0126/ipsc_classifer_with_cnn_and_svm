@@ -10,6 +10,7 @@ from keras import Sequential, layers
 import os
 import sys
 from tensorflow.keras.models import Model,load_model
+from sklearn.preprocessing import StandardScaler
 
 
 def plot_train_history(train_history, train="accuracy", validation="val_accuracy"):
@@ -157,9 +158,9 @@ def bulid_model():
     right_bottom_cnn=cnn_and_pool(right_bottom)
     conjugate=layers.Concatenate(axis=-1)([full_cnn,left_top_cnn,right_top_cnn,left_bottom_cnn,right_bottom_cnn])
     output=layers.Conv2D(cnn_feature[len(cnn_feature)-1], (3,3), activation='relu', padding='same')(conjugate)
-    # output=layers.MaxPooling2D((2,2), padding='same')(output)
+    output=layers.MaxPooling2D((2,2), padding='same')(output)
     
-    output=layers.Flatten()(output)
+    output=layers.Flatten()(conjugate)
     
     for i in hidden_layer:
         output=layers.Dense(units=i, activation="relu")(output)
@@ -171,39 +172,42 @@ def bulid_model():
 
 def main():
     print("program start")
-    # set_random_seed(42)
+    set_random_seed(42)
     check_GPU()
 
     
-
+    
+    ######## setting
     global hidden_layer;hidden_layer = [1024,1024]
     global cnn_feature;cnn_feature = [32, 64, 128, 256]
     global input_shape;input_shape = (150, 150, 7)
     global n_catagory;n_catagory = 5
-    global train_new_model;train_new_model=True
+    global train_new_model;train_new_model=False
     global print_model_blueprint;print_model_blueprint=True
+    global epochs;epochs=30
+    global blueprint_dpi;blueprint_dpi=600
+    global pca_dimension;pca_dimension=64
     
-    # train_new_model=False to use trained model
     
-    
-    #  build model
+    ######## build model
     model=bulid_model()
     from tensorflow.keras.optimizers import RMSprop
     # RMSprop(learning_rate=1e-4)
-    model.compile(optimizer=RMSprop(learning_rate=1e-8), loss="categorical_crossentropy", metrics=["accuracy"])
+    model.compile(optimizer=RMSprop(learning_rate=1e-5), loss="categorical_crossentropy", metrics=["accuracy"])
     model.summary()
     # plot model
     from tensorflow.keras.utils import plot_model
     if print_model_blueprint:
         print("generate image...")
-        plot_model(model,show_shapes=True,to_file="model005.png",dpi=2400)
+        plot_model(model,show_shapes=True,to_file="model005.png",dpi=blueprint_dpi)
         print("generate image complete")
     
     
     
     
-    # evaluate model
+    ######## train model
     
+    # load dataset
     x_train, y_train, x_test, y_test, list_of_cata = load_dataset(r"dataset_new\iPSC_Morphologies")
     print(list_of_cata)
     print(x_train.shape)
@@ -223,8 +227,8 @@ def main():
         temp=scaler.transform(x_test[:,:,:,i].reshape(-1, 1))
         temp=temp.reshape(x_test[:,:,:,i].shape)
         x_test[:,:,:,i]=temp
-    print(x_train.shape)'''
-    
+    print(x_train.shape)
+    del temp'''
     
     if train_new_model:
         print("start training")
@@ -232,7 +236,7 @@ def main():
             x_train,
             y_train,
             batch_size=32,
-            epochs=30,
+            epochs=epochs,
             verbose=1,
             validation_split=0.2,
         )
@@ -241,18 +245,23 @@ def main():
     else:
         model=load_model("model005.keras")
         print("load trained model")
-     
+
+
+
+    ######## valuate model
+
     from sklearn.metrics import classification_report
     loss, accuracy = model.evaluate(x_test, y_test)
     
     print("test loss: ", loss)
     print("test accuracy: ", accuracy)
     from sklearn.metrics import classification_report
-    print(classification_report(np.argmax(y_test, axis=1), np.argmax(model.predict(x_test), axis=1)))
+    report_fully_connect=classification_report(np.argmax(y_test, axis=1), np.argmax(model.predict(x_test), axis=1))
+    print(report_fully_connect)
     # print(model.layers)
     
     
-    # get cnn model
+    ######## get cnn model
     for i in model.layers:
         if type(i)==type(layers.Flatten()):
             CNN_model=Model(inputs=model.input,outputs=i.output)
@@ -261,85 +270,125 @@ def main():
             x_test_features = CNN_model.predict(x_test)
             y_train_cata=np.argmax(y_train, axis=1)
             y_test_cata=np.argmax(y_test, axis=1)
+            break
+    print("get cnn model")
+    
+    print(x_train_features.shape)
+    print(x_train_features[0][:10])
     
     
-    from sklearn.preprocessing import StandardScaler
     scaler=StandardScaler()
     x_train_features=scaler.fit_transform(x_train_features)
     x_test_features=scaler.transform(x_test_features)
     print(x_train_features.shape)
-    print(x_train_features[0])
+    print(x_train_features[0][:10])
     
-    # PCA
-    from sklearn.decomposition import KernelPCA,PCA
+    ######## plot 
+    from umap import UMAP
+    umap = UMAP(n_components=3, random_state=42)
+    x_train_embedded = umap.fit_transform(x_train_features)
+    x_test_embedded = umap.transform(x_test_features)
 
-    # pca = PCA(n_components=0.85)
-    pca = KernelPCA(kernel='rbf', n_components=100)
-    x_train_pca = pca.fit_transform(x_train_features)
-    x_test_pca = pca.transform(x_test_features)
-    print("pca demention:" ,x_train_pca.shape[-1])
-    
-    
-    
-    # my.plt_general_setting_init()
     fig = plt.figure(figsize=(10, 8))
     ax = fig.add_subplot(111, projection='3d')
-    # ax.subplot(111,projection='3d')
-    ax.scatter(x_train_pca[:,0],x_train_pca[:,1],x_train_pca[:,2],c=y_train_cata,cmap='coolwarm')
-    # my.plt_general_setting_end()
+    ax.scatter(x_train_embedded[:,0],x_train_embedded[:,1],x_train_embedded[:,2],c=y_train_cata,cmap='coolwarm',s=5)
+    ax.scatter(x_test_embedded[:,0],x_test_embedded[:,1],x_test_embedded[:,2],c=y_test_cata,cmap='coolwarm',s=30)
     
     
     
     
-    # scaler=StandardScaler()
-    # x_train_pca=scaler.fit_transform(x_train_pca)
-    # x_test_pca=scaler.transform(x_test_pca)
-    print(x_train_pca[0:5])
     
+    
+    ######## PCA
+    from sklearn.decomposition import KernelPCA,PCA
+    print("start training PCA ...")
+    # pca = PCA(n_components=0.85)
+    del x_train, x_test
+    pca = KernelPCA(kernel='rbf', n_components=pca_dimension,gamma=1e-5)
+    x_train_pca = pca.fit_transform(x_train_features)
+    x_test_pca = pca.transform(x_test_features)
+    
+    print("pca demention:" ,x_train_pca.shape[-1])
+    fig = plt.figure(figsize=(10, 8))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(x_train_pca[:,0],x_train_pca[:,1],x_train_pca[:,2],c=y_train_cata,cmap='coolwarm',s=5)
+    ax.scatter(x_test_pca[:,0],x_test_pca[:,1],x_test_pca[:,2],c=y_test_cata,cmap='coolwarm',s=30)
 
-    # train svm
+    print("successfully trained PCA")
+        
+    # plt.show()
+    
+    print(x_train_pca.shape)
+    print(x_train_pca[0][:100])
+    
+    
+    
+    ######## LDA
+    
+    from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+    from sklearn.metrics.pairwise import rbf_kernel
+
+    lda = LinearDiscriminantAnalysis(n_components=4)
+    x_train_lda = lda.fit_transform(x_train_features, y_train_cata)
+    x_test_lda = lda.transform(x_test_features)
+    print(x_train_lda.shape)
+    fig = plt.figure(figsize=(10, 8))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(x_train_lda[:,0],x_train_lda[:,1],x_train_lda[:,2],c=y_train_cata,cmap='coolwarm',s=5)
+    ax.scatter(x_test_lda[:,0],x_test_lda[:,1],x_test_lda[:,2],c=y_test_cata,cmap='coolwarm',s=30)
+
+    print("successfully trained LDA")
+    # plt.show()
+    
+    ######### train pca+svm
     from sklearn.svm import SVC
     from sklearn.svm import LinearSVC
-    
+    from sklearn.base import clone
+
 
     # svm = LinearSVC(C=1, max_iter=int(1e5), verbose=1)
     # svm = LinearSVC(C=1, max_iter=int(1e5))
-    svm = SVC(kernel='poly', degree=3, C=100, coef0=1, verbose=1,decision_function_shape='ovo')
+    pca_svm = SVC(kernel='poly', degree=3, C=100, coef0=1, verbose=1,decision_function_shape='ovo')
+    
     print("start training svm...")
-    svm.fit(x_train_pca, y_train_cata)
+    pca_svm.fit(x_train_pca, y_train_cata)
     print("training end")
-    y_predict=svm.predict(x_test_pca)
-    
-    report = classification_report(y_test_cata, y_predict)
-    print(report)
+    y_predict=pca_svm.predict(x_test_pca)
+    report_pca_svm = classification_report(y_test_cata, y_predict)
     
     
-    '''
-    x_range = np.linspace(x_train_pca[:, 0].min(), x_train_pca[:, 0].max(), 30)
-    y_range = np.linspace(x_train_pca[:, 1].min(), x_train_pca[:, 1].max(), 30)
-    z_range = np.linspace(x_train_pca[:, 2].min(), x_train_pca[:, 2].max(), 30)
-
-    xx, yy, zz = np.meshgrid(x_range, y_range, z_range)
-
-    # 將三維格點展開為一維數組以便進行預測
-    grid_points = np.c_[xx.ravel(), yy.ravel(), zz.ravel()]
-    grid_points = np.hstack((grid_points,np.zeros((len(grid_points),97))))
-    predictions = svm.predict(grid_points)
-
-    # 重構預測結果為 3D 網格大小
-    predictions = predictions.reshape(xx.shape)
-
-    # 使用不同的顏色顯示每個類別的區域
-    colors = ['#FFAAAA', '#AAAAFF', '#AAFFAA', '#FFFFAA', '#FFAAFF']
-
-    for i in range(5):  # 5個類別
-        ax.plot_surface(xx.reshape(-1,1), yy.reshape(-1,1), zz.reshape(-1,1), facecolors=colors[i], rstride=1, cstride=1, alpha=0.3, shade=False)
-    '''
     
+    ######### train svm
+    
+    svm = clone(pca_svm)
+    print("start training svm...")
+    svm.fit(x_train_features, y_train_cata)
+    print("training end")
+    y_predict=svm.predict(x_test_features)
+    
+    report_svm = classification_report(y_test_cata, y_predict)
+    
+    
+    ######### train LDA+svm
+    
+    lda_svm = clone(pca_svm)
+    print("start training svm...")
+    lda_svm.fit(x_train_lda, y_train_cata)
+    print("training end")
+    y_predict=lda_svm.predict(x_test_lda)
+    
+    report_lda_svm = classification_report(y_test_cata, y_predict)
+    
+    
+    
+    
+    print("==============fully connected:==============\n",report_fully_connect)
+    print("==============svm w/o pca:==============\n",report_svm)
+    print("==============svm with pca:==============\n",report_pca_svm)
+    print("==============svm with lda:==============\n",report_lda_svm)
+    
+        
     plt.show()
     print("program end")
 
-
-# x_train,y_train,x_test,y_test=readDataset(r"dataset_new\iPSC_QCData")
-# print(x_train.shape)
 main()

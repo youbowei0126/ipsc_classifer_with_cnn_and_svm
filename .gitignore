@@ -5,7 +5,7 @@
 .trash/
 assest_csv/
 ref/
-assest_image/
+assest_image/git
 **/__pycache__/
 *.zip
 dataset_new/
