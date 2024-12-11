@@ -10,3 +10,5 @@ assest_image/git
 *.zip
 dataset_new/
 *.keras
+*.mp4
+*.gif

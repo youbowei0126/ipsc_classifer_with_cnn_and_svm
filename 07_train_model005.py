@@ -11,7 +11,7 @@ import os
 import sys
 from tensorflow.keras.models import Model,load_model
 from sklearn.preprocessing import StandardScaler
-
+import joblib
 
 def plot_train_history(train_history, train="accuracy", validation="val_accuracy"):
     my.plt_general_setting_init()
@@ -293,8 +293,10 @@ def main():
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(x_train_embedded[:,0],x_train_embedded[:,1],x_train_embedded[:,2],c=y_train_cata,cmap='coolwarm',s=5)
     ax.scatter(x_test_embedded[:,0],x_test_embedded[:,1],x_test_embedded[:,2],c=y_test_cata,cmap='coolwarm',s=30)
-    
-    
+    joblib.dump(x_train_embedded,r"data_in_model007/x_train_embedded.joblib")
+    joblib.dump(x_test_embedded,r"data_in_model007/x_test_embedded.joblib")
+    joblib.dump(y_train_cata,r"data_in_model007/y_train_cata.joblib")
+    joblib.dump(y_test_cata,r"data_in_model007/y_test_cata.joblib")
     
     
     
@@ -313,6 +315,9 @@ def main():
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(x_train_pca[:,0],x_train_pca[:,1],x_train_pca[:,2],c=y_train_cata,cmap='coolwarm',s=5)
     ax.scatter(x_test_pca[:,0],x_test_pca[:,1],x_test_pca[:,2],c=y_test_cata,cmap='coolwarm',s=30)
+    joblib.dump(x_train_pca,r"data_in_model007/x_train_pca.joblib")
+    joblib.dump(x_test_pca,r"data_in_model007/x_test_pca.joblib")
+    
 
     print("successfully trained PCA")
         
@@ -336,7 +341,11 @@ def main():
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(x_train_lda[:,0],x_train_lda[:,1],x_train_lda[:,2],c=y_train_cata,cmap='coolwarm',s=5)
     ax.scatter(x_test_lda[:,0],x_test_lda[:,1],x_test_lda[:,2],c=y_test_cata,cmap='coolwarm',s=30)
+    joblib.dump(x_train_lda,r"data_in_model007/x_train_lda.joblib")
+    joblib.dump(x_test_lda,r"data_in_model007/x_test_lda.joblib")
+    
 
+    
     print("successfully trained LDA")
     # plt.show()
     

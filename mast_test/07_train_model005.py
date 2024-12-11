@@ -11,7 +11,7 @@ import os
 import sys
 from tensorflow.keras.models import Model,load_model
 from sklearn.preprocessing import StandardScaler
-
+import joblib
 
 def plot_train_history(train_history, train="accuracy", validation="val_accuracy"):
     my.plt_general_setting_init()
@@ -183,7 +183,7 @@ def main(input_seed):
     global input_shape;input_shape = (150, 150, 7)
     global n_catagory;n_catagory = 5
     global train_new_model;train_new_model=True
-    global print_model_blueprint;print_model_blueprint=True
+    global print_model_blueprint;print_model_blueprint=False
     global epochs;epochs=30
     global blueprint_dpi;blueprint_dpi=600
     global pca_dimension;pca_dimension=64
@@ -213,22 +213,6 @@ def main(input_seed):
     print(x_train.shape)
     print(y_train.shape)
 
-    '''
-    from sklearn.preprocessing import StandardScaler
-    # stat_df=pd.read_csv(r"calculate_dataset_Statistics.csv")
-    for i in tqdm(range(x_train.shape[-1])):
-        scaler=StandardScaler()
-        # scaler.mean_=stat_df.loc[i,"average"]
-        # scaler.scale_=stat_df.loc[i,"std"]
-        temp=scaler.fit_transform(x_train[:,:,:,i].reshape(-1, 1))
-        temp=temp.reshape(x_train[:,:,:,i].shape)
-        x_train[:,:,:,i]=temp
-        
-        temp=scaler.transform(x_test[:,:,:,i].reshape(-1, 1))
-        temp=temp.reshape(x_test[:,:,:,i].shape)
-        x_test[:,:,:,i]=temp
-    print(x_train.shape)
-    del temp'''
     
     if train_new_model:
         print("start training")
@@ -240,10 +224,10 @@ def main(input_seed):
             verbose=1,
             validation_split=0.2,
         )
-        model.save("model005.keras")
+        model.save(rf"mast_test\model\model005_{input_seed}.keras")
         plot_train_history(train_history)
     else:
-        model=load_model("model005.keras")
+        model=load_model(rf"mast_test\model\model005_{input_seed}.keras")
         print("load trained model")
 
 
@@ -387,12 +371,20 @@ def main(input_seed):
     print("==============svm with pca:==============\n",report_pca_svm)
     print("==============svm with lda:==============\n",report_lda_svm)
     
-        
-    plt.show()
+    # plt.show()
     print("program end")
-    return [input_seed,report_fully_connect,report_svm,report_pca_svm,report_lda_svm]
+    return [input_seed,report_fully_connect,report_svm,report_pca_svm,report_lda_svm,train_history.history]
 
 
-
-for i in range(1,50,1):
-    main()
+# reports=[0]
+for i in tqdm(range(66,101,1)):
+    with open(fr"mast_test\log\{i}.txt", 'w') as file_:
+        sys.stdout = file_
+        report=main(i)
+        sys.stdout = sys.__stdout__
+    joblib.dump(report,rf"mast_test\reports\report_{i}.joblib")
+    
+    del report
+    import gc
+    gc.collect()
+    print(f"save report_{i}.joblib")
