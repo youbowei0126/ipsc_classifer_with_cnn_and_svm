@@ -240,7 +240,7 @@ def main(input_seed):
     print("test loss: ", loss)
     print("test accuracy: ", accuracy)
     from sklearn.metrics import classification_report
-    report_fully_connect=classification_report(np.argmax(y_test, axis=1), np.argmax(model.predict(x_test), axis=1))
+    report_fully_connect=classification_report(np.argmax(y_test, axis=1), np.argmax(model.predict(x_test), axis=1),output_dict=True)
     print(report_fully_connect)
     # print(model.layers)
     
@@ -338,7 +338,7 @@ def main(input_seed):
     pca_svm.fit(x_train_pca, y_train_cata)
     print("training end")
     y_predict=pca_svm.predict(x_test_pca)
-    report_pca_svm = classification_report(y_test_cata, y_predict)
+    report_pca_svm = classification_report(y_test_cata, y_predict,output_dict=True)
     
     
     
@@ -350,7 +350,7 @@ def main(input_seed):
     print("training end")
     y_predict=svm.predict(x_test_features)
     
-    report_svm = classification_report(y_test_cata, y_predict)
+    report_svm = classification_report(y_test_cata, y_predict,output_dict=True)
     
     
     ######### train LDA+svm
@@ -361,7 +361,7 @@ def main(input_seed):
     print("training end")
     y_predict=lda_svm.predict(x_test_lda)
     
-    report_lda_svm = classification_report(y_test_cata, y_predict)
+    report_lda_svm = classification_report(y_test_cata, y_predict,output_dict=True)
     
     
     

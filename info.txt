@@ -1,6 +1,0 @@
-model001:cnn+類神經網絡
-model002:cnn+SVM
-model003:cnn+SVM+標準化
-model004:cnn+SVM+multisensor
-model005:cnn+PCA+SVM+multisensor
-
