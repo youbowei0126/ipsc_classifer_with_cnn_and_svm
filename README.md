@@ -7,3 +7,4 @@
 4. model004:cnn+SVM+multisensor
 5. model005:cnn+PCA+SVM+multisensor
 
+for more information, see "final_presentation.pptx"
