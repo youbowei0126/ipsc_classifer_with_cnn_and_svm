@@ -1,15 +1,15 @@
-import cv2
-import numpy as np
-from sklearn.preprocessing import StandardScaler
+# import cv2
+# import numpy as np
+# from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 import tifffile as tiff
 import mylib as my
-import pandas as pd
-from tqdm import tqdm
+# import pandas as pd
+# from tqdm import tqdm
 
-def laplacian_variance(img):
-    laplacian = cv2.Laplacian(img, cv2.CV_64F)
-    return laplacian.var()
+# def laplacian_variance(img):
+#     laplacian = cv2.Laplacian(img, cv2.CV_64F)
+#     return laplacian.var()
 
 
 def plot_gray_image(image, new_frame=True):
@@ -19,7 +19,7 @@ def plot_gray_image(image, new_frame=True):
     # plt.axis("off")
 
 
-PATH = r"dataset_new\iPSC_QCData\Cell\Cell_o0004_i1072_APC-Brightfield-DAPI-GREEN-PE-RDP3001.tiff"
+PATH = r"dataset_new\iPSC_Morphologies\train\Big\Big_o0004_i4067_APC-Brightfield-DAPI-GREEN-PE-CellSegmentation-NucleusSegmentation.tiff"
 # 讀取 TIFF 影像
 tiff_data = tiff.imread(PATH)
 
@@ -35,9 +35,10 @@ for i in range(tiff_data.shape[2]):
     # plt.title(tiff_data[:, i, :, :].max())
     plt.axis("off")
     plt.subplots_adjust(wspace=0, hspace=0)
+    plt.title("")
 
 plt.tight_layout()
-
+plt.savefig("visualize/image001.png",transparent=True)
 
 
 
