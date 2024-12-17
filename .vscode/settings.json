@@ -1,0 +1,12 @@
+{
+    "surround.custom": {
+
+    },
+    "surround.with.for": {
+        
+        "label": "for",
+        "description": "for ($1) { ... }",
+        "disabled": false,
+        "snippet": "for ($1) {\n\t$TM_SELECTED_TEXT\n}$0"
+    }
+}
