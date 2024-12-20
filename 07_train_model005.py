@@ -13,14 +13,25 @@ from tensorflow.keras.models import Model,load_model
 from sklearn.preprocessing import StandardScaler
 import joblib
 
+
 def plot_train_history(train_history, train="accuracy", validation="val_accuracy"):
-    my.plt_general_setting_init()
+    my.plt_general_setting_init(figsize=(10,12))
+    plt.subplot(211)
     plt.plot(train_history.history[train], label="train")
     plt.plot(train_history.history[validation], label="validation")
     plt.title("Train History")
     plt.ylabel(train)
     plt.xlabel("Epoch")
-    my.plt_general_setting_end("train_history.svg")
+    plt.grid()
+    plt.legend()
+    plt.subplot(212)
+    plt.plot(train_history.history['loss'], label="train")
+    plt.plot(train_history.history['val_loss'], label="validation")
+    plt.title("Train History")
+    plt.ylabel("loss")
+    plt.xlabel("Epoch")
+    my.plt_general_setting_end("train_history.svg") 
+
 
 
 def load_dataset(path):
@@ -182,7 +193,7 @@ def main():
     global cnn_feature;cnn_feature = [32, 64, 128, 256]
     global input_shape;input_shape = (150, 150, 7)
     global n_catagory;n_catagory = 5
-    global train_new_model;train_new_model=False
+    global train_new_model;train_new_model=True
     global print_model_blueprint;print_model_blueprint=True
     global epochs;epochs=30
     global blueprint_dpi;blueprint_dpi=600

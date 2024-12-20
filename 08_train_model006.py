@@ -14,13 +14,15 @@ from sklearn.preprocessing import StandardScaler
 import joblib
 
 def plot_train_history(train_history, train="accuracy", validation="val_accuracy"):
-    my.plt_general_setting_init()
+    my.plt_general_setting_init(figsize=(10,12))
     plt.subplot(211)
     plt.plot(train_history.history[train], label="train")
     plt.plot(train_history.history[validation], label="validation")
     plt.title("Train History")
     plt.ylabel(train)
     plt.xlabel("Epoch")
+    plt.grid()
+    plt.legend()
     plt.subplot(212)
     plt.plot(train_history.history['loss'], label="train")
     plt.plot(train_history.history['val_loss'], label="validation")
@@ -270,7 +272,7 @@ def main():
     global cnn_feature;cnn_feature = [32, 64, 128, 256]
     global input_shape;input_shape = (150, 150, 7)
     global n_catagory;n_catagory = 5
-    global train_new_model;train_new_model=False
+    global train_new_model;train_new_model=True
     global print_model_blueprint;print_model_blueprint=True
     global epochs;epochs=30
     global blueprint_dpi;blueprint_dpi=600
@@ -382,10 +384,10 @@ def main():
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(x_train_embedded[:,0],x_train_embedded[:,1],x_train_embedded[:,2],c=y_train_cata,cmap='coolwarm',s=5)
     ax.scatter(x_test_embedded[:,0],x_test_embedded[:,1],x_test_embedded[:,2],c=y_test_cata,cmap='coolwarm',s=30)
-    # joblib.dump(x_train_embedded,r"data_in_model007/x_train_embedded.joblib")
-    # joblib.dump(x_test_embedded,r"data_in_model007/x_test_embedded.joblib")
-    # joblib.dump(y_train_cata,r"data_in_model007/y_train_cata.joblib")
-    # joblib.dump(y_test_cata,r"data_in_model007/y_test_cata.joblib")
+    joblib.dump(x_train_embedded,r"data_in_model006/x_train_embedded.joblib")
+    joblib.dump(x_test_embedded,r"data_in_model006/x_test_embedded.joblib")
+    joblib.dump(y_train_cata,r"data_in_model006/y_train_cata.joblib")
+    joblib.dump(y_test_cata,r"data_in_model006/y_test_cata.joblib")
     
     
     
@@ -404,8 +406,7 @@ def main():
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(x_train_pca[:,0],x_train_pca[:,1],x_train_pca[:,2],c=y_train_cata,cmap='coolwarm',s=5)
     ax.scatter(x_test_pca[:,0],x_test_pca[:,1],x_test_pca[:,2],c=y_test_cata,cmap='coolwarm',s=30)
-    # joblib.dump(x_train_pca,r"data_in_model007/x_train_pca.joblib")
-    # joblib.dump(x_test_pca,r"data_in_model007/x_test_pca.joblib")
+    joblib.dump(x_train_pca,r"data_in_model00sx_test_pca.joblib")
     
 
     print("successfully trained PCA")
@@ -430,8 +431,8 @@ def main():
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(x_train_lda[:,0],x_train_lda[:,1],x_train_lda[:,2],c=y_train_cata,cmap='coolwarm',s=5)
     ax.scatter(x_test_lda[:,0],x_test_lda[:,1],x_test_lda[:,2],c=y_test_cata,cmap='coolwarm',s=30)
-    # joblib.dump(x_train_lda,r"data_in_model007/x_train_lda.joblib")
-    # joblib.dump(x_test_lda,r"data_in_model007/x_test_lda.joblib")
+    joblib.dump(x_train_lda,r"data_in_model006/x_train_lda.joblib")
+    joblib.dump(x_test_lda,r"data_in_model006/x_test_lda.joblib")
     
 
     
