@@ -105,7 +105,7 @@ see **final_presentation.pptx** and **final_report.pdf**
 ├─model004.keras  # model of 004
 ├─model004.png # blueprint of 004
 ├─model005.keras # model of 005
-├─model005.png# blueprint of 005
+├─model005.png # blueprint of 005
 ├─model006.keras # model of 006
 ├─model006.png # blueprint of 006
 ├─mylib.py
